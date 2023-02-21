@@ -1,10 +1,11 @@
 const express = require("express");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("Hello World");
@@ -35,7 +36,7 @@ dbConnect();
 // });
 
 const productCollection = client.db("moontech").collection("product");
-
+// get products
 app.get("/products", async (req, res) => {
   try {
     let cursor = productCollection.find({});
@@ -45,6 +46,28 @@ app.get("/products", async (req, res) => {
       success: true,
       message: "Successfully get the Data",
       data: products,
+    });
+  } catch (error) {
+    res.send({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+// insert products post
+
+app.post("/product", async (req, res) => {
+  try {
+    const product = req.body;
+    console.log(product);
+
+    const result = await productCollection.insertOne(product);
+
+    res.send({
+      success: true,
+      message: "Data Insert successfully",
+      data: result,
     });
   } catch (error) {
     res.send({
