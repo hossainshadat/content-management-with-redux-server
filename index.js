@@ -1,9 +1,9 @@
 const express = require("express");
-require("dotenv").config();
+const app = express();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+require("dotenv").config();
 const cors = require("cors");
 
-const app = express();
 app.use(cors());
 app.use(express.json());
 
@@ -35,11 +35,11 @@ dbConnect();
 //   client.close();
 // });
 
-const productCollection = client.db("moontech").collection("product");
+const ProductCollection = client.db("moontech").collection("product");
 // get products
 app.get("/products", async (req, res) => {
   try {
-    let cursor = productCollection.find({});
+    let cursor = ProductCollection.find({});
     const products = await cursor.toArray();
 
     res.send({
@@ -62,13 +62,43 @@ app.post("/product", async (req, res) => {
     const product = req.body;
     console.log(product);
 
-    const result = await productCollection.insertOne(product);
+    const result = await ProductCollection.insertOne(product);
 
     res.send({
       success: true,
       message: "Data Insert successfully",
       data: result,
     });
+  } catch (error) {
+    res.send({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+// Delete Product
+
+app.delete("/product/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const product = await ProductCollection.findOne({ _id: new ObjectId(id) });
+
+    if (!product?._id) {
+      res.send({
+        success: false,
+        error: "product doesn't exist",
+      });
+      return;
+    }
+    const result = await ProductCollection.deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount) {
+      res.send({
+        success: true,
+        message: "Successfully deleted the product",
+      });
+    }
   } catch (error) {
     res.send({
       success: false,
