@@ -107,6 +107,34 @@ app.delete("/product/:id", async (req, res) => {
   }
 });
 
+// Update product
+
+app.put("/product/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const product = req.body;
+    const query = { id: id };
+    const options = { upsert: true };
+    const updateDoc = {
+      $set: product,
+    };
+
+    const result = await ProductCollection.updateOne(query, updateDoc, options);
+    console.log(result);
+
+    res.send({
+      success: true,
+      message: "Successfully Update the product",
+      data: result,
+    });
+  } catch (error) {
+    res.send({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
 app.listen(process.env.PORT || 5000, () => {
   console.log(`Server running on port  ${process.env.PORT}`);
 });
