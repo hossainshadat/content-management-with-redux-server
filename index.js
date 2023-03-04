@@ -55,6 +55,24 @@ app.get("/products", async (req, res) => {
   }
 });
 
+app.get("/product/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const product = await ProductCollection.findOne({ _id: new ObjectId(id) });
+
+    res.send({
+      success: true,
+      message: "Successfully get the Data",
+      data: product,
+    });
+  } catch (error) {
+    res.send({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
 // insert products post
 
 app.post("/product", async (req, res) => {
@@ -110,21 +128,25 @@ app.delete("/product/:id", async (req, res) => {
 // Update product
 
 app.put("/product/:id", async (req, res) => {
-  const { id } = req.params;
   try {
+    const id = req.params.id;
     const product = req.body;
-    const query = { id: id };
+    const filter = { _id: new ObjectId(id) };
     const options = { upsert: true };
     const updateDoc = {
       $set: product,
     };
+    const result = await ProductCollection.updateOne(
+      filter,
+      updateDoc,
+      options
+    );
 
-    const result = await ProductCollection.updateOne(query, updateDoc, options);
     console.log(result);
 
     res.send({
       success: true,
-      message: "Successfully Update the product",
+      message: "Successfully Update the Data",
       data: result,
     });
   } catch (error) {
